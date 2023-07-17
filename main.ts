@@ -24,7 +24,7 @@ serve(async (_req: Request) => {
 
             const count = (value.count || 0) + 1;
 
-            kv.set(["links", query], { path: query, count });
+            kv.set(["links", query], { ...value, count });
 
             const { path } = value;
             return Response.redirect(path, 307);
