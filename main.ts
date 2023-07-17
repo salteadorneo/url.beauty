@@ -22,6 +22,8 @@ serve(async (_req: Request) => {
                 return new Response("Not found", { status: 404 });
             }
 
+            kv.set(["links", query], { path: query, count: value.count + 1 });
+
             const { path } = value;
             return Response.redirect(path, 307);
         }
