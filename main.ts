@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.142.0/http/server.ts";
 
 serve(async (_req: Request) => {
-    if (!_req.url.endsWith("favicon.ico")){
+    if (!_req.url.endsWith("favicon.ico")) {
 
         const { pathname } = new URL(_req.url)
         const query = pathname.substring(1)
@@ -11,15 +11,12 @@ serve(async (_req: Request) => {
         if (query.startsWith("http")) {
             const hash = await hashStr(query)
 
-            const { value } = await kv.get(["links", hash]);
-            if (value) {
-                return new Response(JSON.stringify(value), { status: 200 });
+            let res = await kv.get(["links", hash]);
+            if (!res || !res.value) {
+                await kv.set(["links", hash], { path: query, count: 0 });
+                res = await kv.get(["links", hash]);
             }
 
-            await kv.set(["links", hash], { path: query });
-
-            const res = await kv.get(["links", hash]);
-            
             return new Response(JSON.stringify(res), { status: 200 });
         } else {
             const { value } = await kv.get(["links", query]);
