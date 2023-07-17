@@ -9,15 +9,14 @@ serve(async (_req: Request) => {
         const kv = await Deno.openKv();
 
         if (query.startsWith("http")) {
-            const { value } = await kv.get(["links", query]);
+            const hash = await hashStr(query)
+
+            const { value } = await kv.get(["links", hash]);
             if (value) {
                 return new Response(JSON.stringify(value), { status: 200 });
             }
 
-            const hash = await hashStr(query)
-
-            kv.set(["links", hash], { path: query });
-            const res = await kv.get(["links", hash]);
+            const res = await kv.set(["links", hash], { path: query });
 
             return new Response(JSON.stringify(res), { status: 200 });
         } else {
