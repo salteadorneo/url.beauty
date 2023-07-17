@@ -16,8 +16,10 @@ serve(async (_req: Request) => {
                 return new Response(JSON.stringify(value), { status: 200 });
             }
 
-            const res = await kv.set(["links", hash], { path: query });
+            await kv.set(["links", hash], { path: query });
 
+            const res = await kv.get(["links", hash]);
+            
             return new Response(JSON.stringify(res), { status: 200 });
         } else {
             const { value } = await kv.get(["links", query]);
