@@ -1,15 +1,37 @@
-/// <reference no-default-lib="true" />
-/// <reference lib="dom" />
-/// <reference lib="dom.iterable" />
-/// <reference lib="dom.asynciterable" />
-/// <reference lib="deno.ns" />
+import { serve } from "https://deno.land/std@0.142.0/http/server.ts";
 
-import "$std/dotenv/load.ts";
+serve(async (_req: Request) => {
+    if (!_req.url.endsWith("favicon.ico")){
 
-import { start } from "$fresh/server.ts";
-import manifest from "./fresh.gen.ts";
+        const { pathname } = new URL(_req.url)
+        const query = pathname.substring(1)
 
-import twindPlugin from "$fresh/plugins/twind.ts";
-import twindConfig from "./twind.config.ts";
+        const kv = await Deno.openKv();
 
-await start(manifest, { plugins: [twindPlugin(twindConfig)] });
+        if (query.startsWith("http")) {
+            const hash = await hashStr(query)
+
+            kv.set(["links", hash], { path: query });
+            const res = await kv.get(["links", hash]);
+
+            return new Response(JSON.stringify(res), { status: 200 });
+        } else {
+            const { value } = await kv.get(["links", query]);
+
+            if (!value) {
+                return new Response("Not found", { status: 404 });
+            }
+
+            const { path } = value;
+            return Response.redirect(path, 307);
+        }
+    }
+});
+
+async function hashStr(message) {
+  const data = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+  return hashHex
+}
