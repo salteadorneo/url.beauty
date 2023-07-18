@@ -20,10 +20,14 @@ serve(async (_req: Request, connInfo: ConnInfo): Promise<Response> => {
   if (query.startsWith("http")) {
     const hash = await hashStr(query);
 
-    let res = await kv.get(["links", hash]);
+    const onlyNums = hash.replace(/\D/g, "");
+
+    const id = idToShortURL(onlyNums);
+
+    let res = await kv.get(["links", id]);
     if (!res || !res.value) {
-      await kv.set(["links", hash], { path: query, count: 0, requests: [] });
-      res = await kv.get(["links", hash]);
+      await kv.set(["links", id], { path: query, count: 0, requests: [] });
+      res = await kv.get(["links", id]);
     }
 
     return new Response(JSON.stringify(res), { status: 200 });
@@ -56,4 +60,15 @@ async function hashStr(message: string) {
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
   return hashHex;
+}
+
+function idToShortURL(n) {
+  const map = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const shorturl = [];
+  while (n) {
+    shorturl.push(map[n % 62]);
+    n = Math.floor(n / 62);
+  }
+  shorturl.reverse();
+  return shorturl.join("").slice(0, 5);
 }
