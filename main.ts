@@ -1,8 +1,10 @@
 import { ConnInfo, serve } from "https://deno.land/std@0.142.0/http/server.ts";
 
 serve(async (_req: Request, connInfo: ConnInfo): Promise<Response> => {
-  const { pathname } = new URL(_req.url);
+  const { pathname, searchParams } = new URL(_req.url);
   const query = pathname.substring(1);
+
+  const stats = searchParams.get("stats");
 
   const kv = await Deno.openKv();
 
@@ -37,7 +39,16 @@ serve(async (_req: Request, connInfo: ConnInfo): Promise<Response> => {
 
     return new Response(JSON.stringify(res), { status: 200 });
   } else {
-    const { value } = await kv.get(["links", query]);
+    const res = await kv.get(["links", query]);
+
+    if (stats) {
+      return new Response(JSON.stringify(res), {
+        status: 200,
+        headers: { "Access-Control-Allow-Origin": "*" },
+      });
+    }
+
+    const { value } = res;
 
     if (!value) {
       return Response.redirect("https://web.url.beauty", 307);
