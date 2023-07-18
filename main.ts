@@ -14,7 +14,12 @@ serve(async (_req: Request, connInfo: ConnInfo): Promise<Response> => {
       result.push(entry);
     }
 
-    return new Response(JSON.stringify(result), { status: 200 });
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
   }
 
   if (query.startsWith("http")) {
