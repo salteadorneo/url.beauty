@@ -6,6 +6,17 @@ serve(async (_req: Request, connInfo: ConnInfo): Promise<Response> => {
 
   const kv = await Deno.openKv();
 
+  if (query === "all") {
+    const entries = kv.list({ prefix: ["links"] });
+
+    const result = [];
+    for await (const entry of entries) {
+      result.push(entry);
+    }
+
+    return new Response(JSON.stringify(result), { status: 200 });
+  }
+
   if (query.startsWith("http")) {
     const hash = await hashStr(query);
 
@@ -20,7 +31,7 @@ serve(async (_req: Request, connInfo: ConnInfo): Promise<Response> => {
     const { value } = await kv.get(["links", query]);
 
     if (!value) {
-      return new Response("Not found", { status: 404 });
+      return Response.redirect("https://web.url.beauty", 307);
     }
 
     const { path, count = 0, requests = [] } = value;
