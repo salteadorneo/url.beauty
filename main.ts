@@ -25,11 +25,10 @@ serve(async (_req: Request) => {
                 return new Response("Not found", { status: 404 });
             }
 
-            const count = (value.count || 0) + 1;
+            const { path, count } = value;
 
-            kv.set(["links", query], { ...value, count });
+            kv.set(["links", query], { path, count: count + 1 });
 
-            const { path } = value;
             return Response.redirect(path, 307);
         }
     }
