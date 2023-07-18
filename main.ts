@@ -1,6 +1,6 @@
-import { serve } from "https://deno.land/std@0.142.0/http/server.ts";
+import { ConnInfo, serve } from "https://deno.land/std@0.142.0/http/server.ts";
 
-serve(async (_req: Request): Promise<Response> => {
+serve(async (_req: Request, connInfo: ConnInfo): Promise<Response> => {
   const { pathname } = new URL(_req.url);
   const query = pathname.substring(1);
 
@@ -11,7 +11,7 @@ serve(async (_req: Request): Promise<Response> => {
 
     let res = await kv.get(["links", hash]);
     if (!res || !res.value) {
-      await kv.set(["links", hash], { path: query, count: 0 });
+      await kv.set(["links", hash], { path: query, count: 0, requests: [] });
       res = await kv.get(["links", hash]);
     }
 
@@ -23,9 +23,15 @@ serve(async (_req: Request): Promise<Response> => {
       return new Response("Not found", { status: 404 });
     }
 
-    const { path, count } = value;
+    const { path, count = 0, requests = [] } = value;
 
-    kv.set(["links", query], { path, count: count + 1 });
+    requests.push({
+      ip: connInfo.remoteAddr?.hostname,
+      userAgent: _req.headers.get("user-agent"),
+      time: new Date().toUTCString(),
+    });
+
+    kv.set(["links", query], { path, count: count + 1, requests });
 
     return Response.redirect(path, 307);
   }
