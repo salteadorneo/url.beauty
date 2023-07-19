@@ -1,6 +1,28 @@
 {
   "lock": false,
   "tasks": {
-    "start": "deno run -A --unstable --watch main.ts"
+    "start": "deno run -A --allow-env --unstable --watch main.ts"
+  },
+  "lint": {
+    "include": [
+      "/"
+    ],
+    "exclude": [],
+    "rules": {
+      "tags": [
+        "recommended"
+      ],
+      "include": [],
+      "exclude": []
+    }
+  },
+  "fmt": {
+    "semiColons": false,
+    "include": [],
+    "exclude": []
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "https://esm.sh/preact"
   }
 }
