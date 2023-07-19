@@ -1,6 +1,10 @@
-# fresh project
+# URL Beauty
 
-### Usage
+![An other URL shortener. But, with magic.](public/og.png)
+
+### Contributing
+
+This project uses [Deno](https://deno.land/)
 
 Start the project:
 
