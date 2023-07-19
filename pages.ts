@@ -13,25 +13,32 @@ setup({
   sheet,
 })
 
+const TITLE = "URL Beauty"
+const DESCRIPTION = "An other URL shortener. But, with magic."
+const ORIGIN = Deno.env.get("ORIGIN")
+
 const HEAD = `
-  <title>URL Beauty</title>
+  <title>${TITLE}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="A simple URL shortener." />
+  <meta name="description" content="${DESCRIPTION}" />
+
   <meta name="keywords" content="url, shortener, url shortener, url beauty, beauty, url.beauty" />
-  <meta name="author" content="Salteadorneo" />
+  <meta name="author" content="salteadorneo" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#ffffff" />
+
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@salteadorneo" />
   <meta name="twitter:creator" content="@salteadorneo" />
-  <meta name="twitter:title" content="URL Beauty" />
-  <meta name="twitter:description" content="A simple URL shortener." />
-  <meta name="twitter:image" content="https://url.beauty/assets/og-image.png" />
-  <meta property="og:title" content="URL Beauty" />
-  <meta property="og:description" content="A simple URL shortener." />
-  <meta property="og:image" content="https://url.beauty/assets/og-image.png" />
-  <meta property="og:url" content="https://url.beauty" />
-  <meta property="og:site_name" content="URL Beauty" />
+  <meta name="twitter:title" content="${TITLE}" />
+  <meta name="twitter:description" content="${DESCRIPTION}" />
+  <meta name="twitter:image" content="${ORIGIN}/og.png" />
+
+  <meta property="og:title" content="${TITLE}" />
+  <meta property="og:description" content="${DESCRIPTION}" />
+  <meta property="og:image" content="${ORIGIN}/og.png" />
+  <meta property="og:url" content="${ORIGIN}" />
+  <meta property="og:site_name" content="${TITLE}" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="en_US" />
 `
@@ -198,10 +205,10 @@ function renderCreate(res: any) {
         <div class="${tw`grid max-w-screen-xl px-4 py-8 mx-auto gap-8 lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12`}">
             <div class="${tw`mr-auto place-self-center lg:col-span-7`}">
                 <h1 class="${tw`max-w-lg mb-4 font-extrabold tracking-tight leading-none text-6xl text-white`}">
-                  Make <span class="${tw`bg-clip-text text-transparent bg-gradient-to-b from-pink-700 to-pink-500`}">beauty</span> any link
+                  Make <span class="${tw`bg-clip-text text-transparent bg-gradient-to-b from-pink-700 to-pink-500`}">beauty</span> this link
                 </h1>
                 <p class="${tw`max-w-2xl mb-8 font-light text-white md:text-lg lg:text-xl`}">
-                  An other URL shortener. But, with magic.
+                  Copy the link and share it.
                 </p>
                 <p class="${tw`max-w-2xl mb-8 font-light text-white md:text-lg lg:text-xl`}">
                   Back to <a href="/" class="${tw`underline`}">home</a>
@@ -217,15 +224,11 @@ function renderCreate(res: any) {
                   <div class="${tw`w-72 sm:w-80 flex items-center justify-between bg-white py-2 px-6 rounded-full bg-none text-lg`}">
                     <div class="${tw`flex gap-0`}">
                       <span id="feature-text" class="${tw`font-bold`}"></span>
-                      <span id="url" class="${tw`transition-all`}">${
-    Deno.env.get("ORIGIN")
-  }/${id}</span>
+                      <span id="url" class="${tw`transition-all`}">${ORIGIN}/${id}</span>
                     </div>
                     <button
                       class="${tw`text-gray-900 focus:outline-none`}"
-                      onclick="navigator.clipboard.writeText(\'${`${
-    Deno.env.get("ORIGIN")
-  }/${id}`}\');"
+                      onclick="navigator.clipboard.writeText(\'${`${ORIGIN}/${id}`}\');"
                     >
                       <svg
                         width="24"

@@ -9,6 +9,14 @@ serve(async (_req: Request, connInfo: ConnInfo): Promise<Response> => {
   const { pathname } = new URL(_req.url)
   const query = pathname.substring(1)
 
+  if (query === "og.png") {
+    const og = await Deno.readFile("./public/og.png")
+    return new Response(og, {
+      status: 200,
+      headers: { "Content-Type": "image/png" },
+    })
+  }
+
   if (!query) {
     return new Response(home(), {
       status: 200,
