@@ -90,7 +90,7 @@ function renderHome() {
                 </p>
                 <div class="${tw`flex items-center gap-2`}">
                   <a
-                    href="https://url.beauty/bggDT"
+                    href="https://github.com/salteadorneo/url.beauty"
                     target="_blank"
                     class="${tw`inline-flex items-center justify-center gap-2 px-3 py-1 text-xs font-medium text-center rounded-full border border-gray-300 bg-gray-100 text-gray-900 hover:bg-transparent hover:text-white`}"
                   >
