@@ -111,21 +111,13 @@ function renderHome() {
                     <div class="${tw`w-3 h-3 rounded-full`}" style="background:#FFBE2F;"></div>
                     <div class="${tw`w-3 h-3 rounded-full`}" style="background:#29CE42;"></div>
                   </div>
-                  <div class="${tw`w-72 sm:w-80 flex items-center justify-between bg-white py-2 px-6 rounded-full bg-none text-lg`}">
+                  <form id="frmURL">
+                    <input id="shorten" placeholder="Enter link manually" required class="${tw`hidden w-72 sm:w-80 flex items-center justify-between bg-white py-2 px-6 rounded-full bg-none text-lg`}" />
+                  </form>
+                  <div onclick="handleClick(this)" class="${tw`w-72 sm:w-80 flex items-center justify-between bg-white py-2 px-6 rounded-full bg-none text-lg`}">
                     <div class="${tw`flex gap-0`}">
                       <span id="feature-text" class="${tw`font-bold`}"></span>
-                      <span id="url" class="${tw`transition-all`}">https://example.com</span>
-                    </div>
-                    <div class="${tw`hidden text-gray-500`}">
-                      <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor"
-                      >
-                        <path d="M19 6a1 1 0 0 0-1 1v4a1 1 0 0 1-1 1H7.41l1.3-1.29a1 1 0 0 0-1.42-1.42l-3 3a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l3 3a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42L7.41 14H17a3 3 0 0 0 3-3V7a1 1 0 0 0-1-1Z" />
-                      </svg>
+                      <span id="url" class="${tw`transition-all`}">example.com</span>
                     </div>
                   </div>
                   <p class="${tw`text-sm text-white text-center`}">
@@ -133,8 +125,29 @@ function renderHome() {
                   </p>
                 </div>
                 <script defer>
+                  function handleClick(sender) {
+                    sender.classList.add("hidden")
+
+                    document.querySelector("#shorten").style.display='flex'
+                    document.querySelector("#shorten").focus()
+                  }
+
+                  document.forms.frmURL.addEventListener("submit", handleSubmit)
+
+                  function handleSubmit(e) {
+                    e.preventDefault()
+
+                    const url = document.querySelector("#shorten").value
+
+                    if (!url || !url.includes(".")) {
+                      return
+                    }
+
+                    location.href = window.location.origin + "/" + url
+                  }
+
                   const carouselDomains = [
-                    { domain: "https://example.com", result: "xdqon" },
+                    { domain: "example.com", result: "xdqon" },
                   ]
                   const carouselText = [
                     { text: "url.beauty/" },
@@ -166,7 +179,7 @@ function renderHome() {
 
                   async function carousel(carouselList, eleRef) {
                       var i = 0;
-                      while(true) {
+                      while (true) {
                         await typeSentence(carouselList[i].text, eleRef);
                         await waitForMs(500);
 
@@ -249,7 +262,7 @@ function renderCreate(res: any) {
                     </button>
                   </div>
                   <p class="${tw`text-sm text-gray-400 text-center`}">
-                    Redirect to ${path}
+                    Redirect to <strong>${path}</strong>
                   </p>
                 </div>
             </div>                

@@ -26,7 +26,7 @@ serve(async (_req: Request, connInfo: ConnInfo): Promise<Response> => {
 
   const kv = await Deno.openKv()
 
-  if (query.startsWith("http")) {
+  if (query.startsWith("http") || query.length !== 5 || query.match(/\./g)) {
     const hash = await hashStr(query)
 
     const onlyNums = hash.replace(/\D/g, "")
@@ -61,6 +61,10 @@ serve(async (_req: Request, connInfo: ConnInfo): Promise<Response> => {
   })
 
   kv.set(["links", query], { path, count: count + 1, requests })
+
+  if (!path.startsWith("http")) {
+    return Response.redirect(`https://${path}`, 307)
+  }
 
   return Response.redirect(path, 307)
 })
