@@ -112,7 +112,7 @@ function renderHome() {
                     <div class="${tw`w-3 h-3 rounded-full`}" style="background:#29CE42;"></div>
                   </div>
                   <form id="frmURL">
-                    <input id="shorten" placeholder="Enter link manually" required class="${tw`hidden w-72 sm:w-80 flex items-center justify-between bg-white py-2 px-6 rounded-full bg-none text-lg`}" />
+                    <input id="shorten" placeholder="Enter link manually" required autocapitalize="off" class="${tw`hidden w-72 sm:w-80 flex items-center justify-between bg-white py-2 px-6 rounded-full bg-none text-lg`}" />
                   </form>
                   <div onclick="handleClick(this)" class="${tw`w-72 sm:w-80 flex items-center justify-between bg-white py-2 px-6 rounded-full bg-none text-lg`}">
                     <div class="${tw`flex gap-0`}">
