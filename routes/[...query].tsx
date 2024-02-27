@@ -2,6 +2,7 @@ import { Handlers, PageProps } from "$fresh/server.ts";
 import { hashStr, idToShortURL } from "../utils.ts";
 import Footer from "../components/Footer.tsx";
 import Header from "../components/Header.tsx";
+import CopyToClipboard from "../islands/CopyToClipboard.tsx";
 
 const ORIGIN = Deno.env.get("ORIGIN") || "http://localhost:8000";
 
@@ -13,9 +14,7 @@ export const handler: Handlers = {
 
     if (query.startsWith("http") || query.length !== 5 || query.match(/\./g)) {
       const hash = await hashStr(query);
-
       const onlyNums = hash.replace(/\D/g, "");
-
       const id = idToShortURL(onlyNums);
 
       let res = await kv.get(["links", id]);
@@ -70,39 +69,15 @@ export default function Page(props: PageProps) {
   const { key } = props.data;
   const [, hash] = key;
 
-  const copyToClipboard = () => {
-    const el = document.createElement("textarea");
-    el.value = `${ORIGIN}${hash}`;
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand("copy");
-    document.body.removeChild(el);
-  };
-
   return (
     <main class="max-w-screen-lg mx-auto px-4 text-zinc-800">
       <Header />
-      <p>
-        Your shortened URL is:{" "}
-        <a href={`${ORIGIN}/${hash}`}>{`${ORIGIN}/${hash}`}</a>
+      <p class="flex items-center gap-2 p-4 border rounded bg-zinc-100">
+        <a href={`${ORIGIN}/${hash}`} class="font-semibold">
+          {`${ORIGIN}/${hash}`}
+        </a>
+        <CopyToClipboard value={`${ORIGIN}/${hash}`} />
       </p>
-      {
-        /* <p>
-        Your access token: {accessToken !== null
-          ? (
-            <span style="filter:blur(3px)">
-              ${accessToken + " (intentionally blurred for security)"}
-            </span>
-          )
-          : null}
-      </p>
-      <p>
-        <a href="/oauth/signin">Sign in</a>
-      </p>
-      <p>
-        <a href="/oauth/signout">Sign out</a>
-      </p> */
-      }
       <Footer />
     </main>
   );

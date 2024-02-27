@@ -8,9 +8,9 @@ export default function Header() {
         aria-hidden="true"
         class="absolute inset-0 -z-10 grid grid-cols-2 -space-x-52 opacity-60"
       >
-        <div class="blur-[106px] h-56 bg-gradient-to-br from-primary to-pink-200 dark:from-pink-300">
+        <div class="blur-[106px] h-56">
         </div>
-        <div class="blur-[106px] h-32 bg-gradient-to-r from-pink-200 to-pink-300 dark:to-pink-400">
+        <div class="blur-[106px] h-32 bg-gradient-to-r from-pink-100 to-pink-200 dark:to-pink-300">
         </div>
       </div>
       <section class="relative space-y-4 py-8">
@@ -25,7 +25,7 @@ export default function Header() {
           A free URL shortener fast and easy to use.
         </p>
         <form method="post" class="space-x-2">
-          <Input name="query" placeholder="https://" />
+          <Input name="query" placeholder="https://" autoFocus />
           <Button>Shorten!</Button>
         </form>
       </section>
