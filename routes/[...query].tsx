@@ -54,12 +54,12 @@ export const handler: Handlers = {
 
     const { path, count = 0, requests = [] } = value;
 
-    const location = await getIPLocation();
+    const location = await getIPLocation(ctx.remoteAddr?.hostname);
     const userAgent = _req.headers.get("user-agent") || "";
     const referer = _req.headers.get("referer") || "";
 
     requests.push({
-      ip: location?.ip ?? ctx.remoteAddr?.hostname,
+      ip: ctx.remoteAddr?.hostname,
       city: location?.city ?? "",
       country: location?.country ?? "",
       country_name: location?.country_name ?? "",
@@ -193,64 +193,81 @@ export default function Page(props: PageProps) {
       </section>
       <section
         id="stats"
-        class="flex flex-wrap justify-between gap-2 p-4 border rounded mt-6"
+        class="grid grid-cols-custom gap-2 mt-6"
       >
-        <div class="grid">
+        <div class="grid p-4 border rounded">
           <p>
-            <strong>Clicks</strong> over the last 7 days
+            {count} <strong>clicks</strong>
           </p>
-          <Chart
-            type="bar"
-            width={300}
-            height={300}
-            data={{
-              labels,
-              datasets: [
-                {
-                  label: "Clicks",
-                  data: data.map((d) => d.count),
-                },
-              ],
-            }}
-          />
+          {data.length > 0
+            ? (
+              <>
+                <p>
+                  <strong>Last 7 days</strong>
+                </p>
+                <Chart
+                  type="bar"
+                  width={290}
+                  height={300}
+                  data={{
+                    labels,
+                    datasets: [
+                      {
+                        label: "",
+                        data: data.map((d) => d.count),
+                      },
+                    ],
+                  }}
+                />
+              </>
+            )
+            : <p class="w-full text-center text-xs opacity-80">No data</p>}
         </div>
-        <div class="grid">
+        <div class="grid p-4 border rounded">
           <p>
             <strong>Referrers</strong>
           </p>
-          <Chart
-            type="pie"
-            width={260}
-            height={260}
-            data={{
-              labels: Object.keys(referrers),
-              datasets: [
-                {
-                  label: "Referrers",
-                  data: Object.values(referrers),
-                },
-              ],
-            }}
-          />
+          {Object.values(referrers).length > 0
+            ? (
+              <Chart
+                type="pie"
+                width={290}
+                height={290}
+                data={{
+                  labels: Object.keys(referrers),
+                  datasets: [
+                    {
+                      label: "",
+                      data: Object.values(referrers),
+                    },
+                  ],
+                }}
+              />
+            )
+            : <p class="w-full text-center text-xs opacity-80">No data</p>}
         </div>
-        <div class="grid">
+        <div class="grid p-4 border rounded">
           <p>
             <strong>Countries</strong>
           </p>
-          <Chart
-            type="pie"
-            width={260}
-            height={260}
-            data={{
-              labels: Object.keys(countries),
-              datasets: [
-                {
-                  label: "Countries",
-                  data: Object.values(countries),
-                },
-              ],
-            }}
-          />
+          {Object.values(countries).length > 0
+            ? (
+              <Chart
+                type="pie"
+                width={290}
+                height={290}
+                data={{
+                  labels: Object.keys(countries),
+                  datasets: [
+                    {
+                      label: "",
+                      data: Object.values(countries),
+                    },
+                  ],
+                }}
+              />
+            )
+            : <p class="w-full text-center text-xs opacity-80">No data</p>}
         </div>
       </section>
       <Footer />
