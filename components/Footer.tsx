@@ -1,18 +1,18 @@
-import LemonIcon from "https://deno.land/x/tabler_icons_tsx@0.0.6/tsx/lemon-2.tsx";
 import BrandGithub from "https://deno.land/x/tabler_icons_tsx@0.0.6/tsx/brand-github.tsx";
 
 export default function Footer() {
   const menus = [
     {
-      title: "Documentation",
-      children: [
-        { name: "Getting Started", href: "#" },
-      ],
-    },
-    {
       title: "Community",
       children: [
-        { name: "Forum", href: "#" },
+        {
+          name: "GitHub",
+          href: "https://github.com/salteadorneo/url.beauty",
+        },
+        {
+          name: "License",
+          href: "https://github.com/salteadorneo/url.beauty/blob/main/LICENSE",
+        },
       ],
     },
   ];
@@ -48,15 +48,10 @@ export default function Footer() {
         </div>
       ))}
 
-      <div class="text-gray-500 space-y-2">
-        <div class="text-xs">
-          MIT License<br />
-          @salteadorneo/url.beauty
-        </div>
-
+      <div class="">
         <a
           href="https://github.com/salteadorneo/url.beauty"
-          class="inline-block hover:text-black"
+          class="inline-block hover:text-pink-500"
           aria-label="GitHub"
         >
           <BrandGithub aria-hidden="true" />

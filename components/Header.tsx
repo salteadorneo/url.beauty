@@ -25,8 +25,10 @@ export default function Header() {
           A free URL shortener fast and easy to use.
         </p>
         <form method="post" class="space-x-2">
-          <Input name="query" placeholder="https://" autoFocus />
-          <Button>Shorten!</Button>
+          <Input name="query" type="url" placeholder="https://" autoFocus />
+          <Button class="!bg-pink-500 hover:!bg-pink-400 text-white">
+            Shorten!
+          </Button>
         </form>
       </section>
     </>
