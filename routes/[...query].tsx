@@ -1,24 +1,13 @@
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { qrcode } from "https://deno.land/x/qrcode@v2.0.0/mod.ts";
 import { Chart } from "$fresh_charts/mod.ts";
-import { getIPLocation } from "https://deno.land/x/ip_location/mod.ts";
+import { getIPLocation } from "https://deno.land/x/ip_location@v1.0.0/mod.ts";
 
 import { hashStr, idToShortURL } from "../utils.ts";
 import Footer from "../components/Footer.tsx";
 import Header from "../components/Header.tsx";
 import CopyToClipboard from "../islands/CopyToClipboard.tsx";
-
-type Request = {
-  ip: string;
-  city: string;
-  country: string;
-  country_name: string;
-  latitude: number;
-  longitude: number;
-  time: Date;
-  userAgent: string;
-  referer: string;
-};
+import { ValueProps } from "../types.ts";
 
 const ORIGIN = Deno.env.get("ORIGIN") || "http://localhost:8000";
 
@@ -28,7 +17,7 @@ export const handler: Handlers = {
   async GET(_req, ctx) {
     const { query } = ctx.params;
 
-    if (query.startsWith("http") || query.length !== 5 || query.match(/\./g)) {
+    if (query.startsWith("http") && query.length !== 5 && query.match(/:/g)) {
       const hash = await hashStr(query);
       const onlyNums = hash.replace(/\D/g, "");
       const id = idToShortURL(onlyNums);
@@ -49,10 +38,10 @@ export const handler: Handlers = {
     const { value } = await kv.get(["links", query]);
 
     if (!value) {
-      return ctx.render({ status: 404 });
+      return ctx.renderNotFound();
     }
 
-    const { path, count = 0, requests = [] } = value;
+    const { path, count = 0, requests = [] }: ValueProps = value;
 
     const location = await getIPLocation(ctx.remoteAddr?.hostname);
     const userAgent = _req.headers.get("user-agent") || "";
@@ -67,7 +56,7 @@ export const handler: Handlers = {
       longitude: location?.longitude ?? 0,
       userAgent,
       referer,
-      time: new Date().toUTCString(),
+      time: new Date(),
     });
 
     kv.set(["links", query], { path, count: count + 1, requests });
@@ -84,6 +73,7 @@ export const handler: Handlers = {
 
     const headers = new Headers();
     headers.set("location", `/${query}`);
+
     return new Response(null, {
       status: 303,
       headers,
@@ -94,11 +84,7 @@ export const handler: Handlers = {
 export default function Page(props: PageProps) {
   const { key, value, qr } = props.data;
   const [, hash] = key;
-  const { path, count = 0, requests = [] }: {
-    path: string;
-    count: number;
-    requests: Request[];
-  } = value;
+  const { path, count = 0, requests = [] }: ValueProps = value;
 
   // get labels last 30 days
   const labels = Array.from({ length: 7 }, (_, i) => {
@@ -140,14 +126,14 @@ export default function Page(props: PageProps) {
     <main class="max-w-screen-lg mx-auto px-4 text-zinc-800">
       <Header />
       <section class="flex flex-col sm:flex-row items-center justify-between flex-wrap gap-2 p-4 border border-zinc-200 rounded bg-zinc-100">
-        <div class="flex flex-col">
+        <div class="flex flex-col max-sm:items-center">
           <div class="flex items-center gap-1">
             <a href={`${ORIGIN}/${hash}`} target="_blank" class="font-semibold">
               {`url.beauty/${hash}`}
             </a>
             <CopyToClipboard value={`${ORIGIN}/${hash}`} />
           </div>
-          <p class="text-sm">
+          <p class="text-sm max-w-64 truncate">
             <a href={path} target="_blank">{path}</a>
           </p>
         </div>
@@ -215,6 +201,7 @@ export default function Page(props: PageProps) {
                       {
                         label: "",
                         data: data.map((d) => d.count),
+                        backgroundColor: "#EC4899",
                       },
                     ],
                   }}
@@ -239,6 +226,7 @@ export default function Page(props: PageProps) {
                     {
                       label: "",
                       data: Object.values(referrers),
+                      backgroundColor: "#EC4899",
                     },
                   ],
                 }}
@@ -262,6 +250,7 @@ export default function Page(props: PageProps) {
                     {
                       label: "",
                       data: Object.values(countries),
+                      backgroundColor: "#EC4899",
                     },
                   ],
                 }}
