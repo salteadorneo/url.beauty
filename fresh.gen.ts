@@ -5,7 +5,6 @@
 import * as $_query_ from "./routes/[...query].tsx";
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
-import * as $admin from "./routes/admin.tsx";
 import * as $index from "./routes/index.tsx";
 import * as $CopyToClipboard from "./islands/CopyToClipboard.tsx";
 import { type Manifest } from "$fresh/server.ts";
@@ -15,7 +14,6 @@ const manifest = {
     "./routes/[...query].tsx": $_query_,
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
-    "./routes/admin.tsx": $admin,
     "./routes/index.tsx": $index,
   },
   islands: {
