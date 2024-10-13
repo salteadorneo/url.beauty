@@ -8,13 +8,24 @@ export async function hashStr(message: string) {
   return hashHex;
 }
 
-export function idToShortURL(n: any) {
+// deno-lint-ignore no-explicit-any
+export function idToShortURL(value: any) {
   const map = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   const shorturl = [];
-  while (n) {
-    shorturl.push(map[n % 62]);
-    n = Math.floor(n / 62);
+  while (value) {
+    shorturl.push(map[value % 62]);
+    value = Math.floor(value / 62);
   }
   shorturl.reverse();
   return shorturl.join("").slice(0, 5);
+}
+
+export function parseUrl(url: string) {
+  if (!url.startsWith("http://") && url.startsWith("http:/")) {
+    return url.replace("http:/", "http://");
+  }
+  if (!url.startsWith("https://") && url.startsWith("https:/")) {
+    return url.replace("https:/", "https://");
+  }
+  return url;
 }
