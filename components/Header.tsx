@@ -13,15 +13,15 @@ export default function Header() {
         <div class="blur-[106px] h-32 bg-gradient-to-r from-pink-100 to-pink-200 dark:to-pink-300">
         </div>
       </div>
-      <section class="relative space-y-4 py-8">
-        <h1 class="font-extrabold leading-[4rem] text-7xl text-pretty max-w-xl">
+      <section class="relative space-y-4 py-16 text-center">
+        <h1 class="font-bold leading-[4rem] text-7xl text-pretty max-w-xl mx-auto">
           Make{" "}
           <span class="bg-clip-text text-transparent bg-gradient-to-b from-pink-700 to-pink-500">
             beauty
           </span>{" "}
           any link
         </h1>
-        <p class="text-xl text-pretty max-w-xl">
+        <p class="text-xl text-pretty max-w-xl mx-auto">
           A free URL shortener fast and easy to use.
         </p>
         <form method="post" class="space-x-2">
