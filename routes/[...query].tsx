@@ -3,29 +3,45 @@ import { qrcode } from "https://deno.land/x/qrcode@v2.0.0/mod.ts";
 import { Chart } from "$fresh_charts/mod.ts";
 import { getIPLocation } from "https://deno.land/x/ip_location@v1.0.0/mod.ts";
 
-import { hashStr, idToShortURL } from "../utils.ts";
-import Footer from "../components/Footer.tsx";
 import Header from "../components/Header.tsx";
+import Footer from "../components/Footer.tsx";
 import CopyToClipboard from "../islands/CopyToClipboard.tsx";
+import DownloadQr from "../components/DownloadQr.tsx";
 import { ValueProps } from "../types.ts";
+import { hashStr, idToShortURL, parseUrl } from "../utils.ts";
 
 const ORIGIN = Deno.env.get("ORIGIN") || "http://localhost:8000";
 
 const kv = await Deno.openKv();
 
 export const handler: Handlers = {
-  async GET(_req, ctx) {
+  async GET(req, ctx) {
     const { query } = ctx.params;
 
-    if (query.startsWith("http") && query.length !== 5 && query.match(/:/g)) {
-      const hash = await hashStr(query);
+    let parseQuery = query;
+    if (
+      query.startsWith("http") && query.length !== 5 &&
+      query.match(/%3A%2F/g)
+    ) {
+      parseQuery = decodeURIComponent(query);
+    }
+
+    if (
+      parseQuery.startsWith("http") && parseQuery.length !== 5 &&
+      parseQuery.match(/:/g)
+    ) {
+      const hash = await hashStr(parseQuery);
       const onlyNums = hash.replace(/\D/g, "");
       const id = idToShortURL(onlyNums);
 
       let res = await kv.get(["links", id]);
 
       if (!res || !res.value) {
-        await kv.set(["links", id], { path: query, count: 0, requests: [] });
+        await kv.set(["links", id], {
+          path: parseQuery,
+          count: 0,
+          requests: [],
+        });
         res = await kv.get(["links", id]);
       }
 
@@ -35,7 +51,7 @@ export const handler: Handlers = {
       return await ctx.render(res);
     }
 
-    const { value } = await kv.get(["links", query]);
+    const { value } = await kv.get(["links", parseQuery]);
 
     if (!value) {
       return ctx.renderNotFound();
@@ -44,14 +60,14 @@ export const handler: Handlers = {
     const { path, count = 0, requests = [] }: ValueProps = value;
 
     const location = await getIPLocation(ctx.remoteAddr?.hostname);
-    const userAgent = _req.headers.get("user-agent") || "";
-    const referer = _req.headers.get("referer") || "";
+    const userAgent = req.headers.get("user-agent") || "";
+    const referer = req.headers.get("referer") || "";
 
     requests.push({
       ip: ctx.remoteAddr?.hostname,
-      city: location?.city ?? "",
-      country: location?.country ?? "",
-      country_name: location?.country_name ?? "",
+      city: location?.city ?? "Unknown",
+      country: location?.country ?? "Unknown",
+      country_name: location?.country_name ?? "Unknown",
       latitude: location?.latitude ?? 0,
       longitude: location?.longitude ?? 0,
       userAgent,
@@ -59,7 +75,7 @@ export const handler: Handlers = {
       time: new Date(),
     });
 
-    kv.set(["links", query], { path, count: count + 1, requests });
+    kv.set(["links", parseQuery], { path, count: count + 1, requests });
 
     if (!path.startsWith("http")) {
       return Response.redirect(`https://${path}`, 307);
@@ -67,13 +83,19 @@ export const handler: Handlers = {
 
     return Response.redirect(path, 307);
   },
-  async POST(req, ctx) {
+  async POST(req) {
     const form = await req.formData();
     const query = form.get("query")?.toString();
 
-    const headers = new Headers();
-    headers.set("location", `/${query}`);
+    if (!query) {
+      return new Response(null, {
+        status: 400,
+        statusText: "Bad Request",
+      });
+    }
 
+    const headers = new Headers();
+    headers.set("location", `/${encodeURIComponent(query)}`);
     return new Response(null, {
       status: 303,
       headers,
@@ -123,77 +145,75 @@ export default function Page(props: PageProps) {
   }, {} as Record<string, number>);
 
   return (
-    <main class="max-w-screen-lg mx-auto px-4 text-zinc-800">
-      <Header />
-      <section class="flex flex-col sm:flex-row items-center justify-between flex-wrap gap-2 p-4 border border-zinc-200 rounded bg-zinc-100">
-        <div class="flex flex-col max-sm:items-center">
-          <div class="flex items-center gap-1">
-            <a href={`${ORIGIN}/${hash}`} target="_blank" class="font-semibold">
-              {`url.beauty/${hash}`}
-            </a>
-            <CopyToClipboard value={`${ORIGIN}/${hash}`} />
-          </div>
-          <p class="text-sm max-w-64 truncate">
-            <a href={path} target="_blank">{path}</a>
-          </p>
+    <main class="relative max-w-screen-lg mx-auto px-4 text-zinc-800">
+      <div
+        aria-hidden="true"
+        class="absolute inset-0 -z-10 grid grid-cols-2 -space-x-52 opacity-60"
+      >
+        <div class="blur-[106px] h-56">
         </div>
-
-        <img
-          src={qr}
-          alt="QR code"
-          class="border-2 border-zinc-200 rounded"
-        />
-
-        <section class="flex items-center gap-2">
+        <div class="blur-[106px] h-32 bg-gradient-to-r from-pink-100 to-pink-200 dark:to-pink-300">
+        </div>
+      </div>
+      <section class="relative space-y-4 py-16 text-center">
+        <h1 class="font-bold leading-[4rem] text-7xl text-balance max-w-xl mx-auto">
+          Oh! A very{" "}
+          <span class="bg-clip-text text-transparent bg-gradient-to-b from-pink-700 to-pink-500">
+            beauty
+          </span>{" "}
+          link
+        </h1>
+      </section>
+      <section class="max-w-xl mx-auto">
+        <section class="flex items-center justify-between py-3 px-4 border border-zinc-200 rounded bg-zinc-100">
+          <div class="flex flex-col max-sm:items-center">
+            <div class="flex items-center gap-1">
+              <a href={`${ORIGIN}/${hash}`} target="_blank" class="font-semibold">
+                {`url.beauty/${hash}`}
+              </a>
+              <CopyToClipboard value={`${ORIGIN}/${hash}`} />
+              <DownloadQr href={qr} />
+            </div>
+            <p class="flex items-center gap-1 text-sm font-medium text-zinc-400">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-corner-down-right"
+              >
+                <polyline points="15 10 20 15 15 20" />
+                <path d="M4 4v7a4 4 0 0 0 4 4h12" />
+              </svg>
+              <a href={path} target="_blank">{parseUrl(path)}</a>
+            </p>
+          </div>
           <a
-            href={qr}
-            class="flex items-center gap-1 bg-zinc-200 hover:bg-zinc-300 rounded-full py-0.5 px-2 text-sm"
-            download="qr.gif"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              class="w-4 h-4"
-            >
-              <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
-              <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
-            </svg>
-            Download QR
-          </a>
-          <a
-            href={`${ORIGIN}/${path}#stats`}
+            href={`${ORIGIN}/${path}`}
             class="flex items-center gap-1 bg-zinc-200 hover:bg-zinc-300 rounded-full py-0.5 px-2 text-sm"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-              class="w-4 h-4"
-            >
-              <path d="M12 2a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1h-1ZM6.5 6a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V6ZM2 9a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V9Z" />
-            </svg>
-            Stats
+            {count} clicks
           </a>
+          <img
+            src={qr}
+            alt="QR code"
+            class="hidden border-2 border-zinc-200 rounded"
+          />
         </section>
       </section>
-      <section
-        id="stats"
-        class="grid grid-cols-custom gap-2 mt-6"
-      >
+      <section id="stats" class="flex flex-col gap-2 max-w-xl mx-auto mt-2">
         <div class="grid p-4 border rounded">
-          <p>
-            {count} <strong>clicks</strong>
-          </p>
+          <p class="font-bold">Last 7 days</p>
           {data.length > 0
             ? (
-              <>
-                <p>
-                  <strong>Last 7 days</strong>
-                </p>
                 <Chart
                   type="bar"
-                  width={290}
+                  width={550}
                   height={300}
                   data={{
                     labels,
@@ -206,19 +226,16 @@ export default function Page(props: PageProps) {
                     ],
                   }}
                 />
-              </>
             )
             : <p class="w-full text-center text-xs opacity-80">No data</p>}
         </div>
         <div class="grid p-4 border rounded">
-          <p>
-            <strong>Referrers</strong>
-          </p>
+          <p class="font-bold">Referrers</p>
           {Object.values(referrers).length > 0
             ? (
               <Chart
                 type="pie"
-                width={290}
+                width={550}
                 height={290}
                 data={{
                   labels: Object.keys(referrers),
@@ -235,14 +252,12 @@ export default function Page(props: PageProps) {
             : <p class="w-full text-center text-xs opacity-80">No data</p>}
         </div>
         <div class="grid p-4 border rounded">
-          <p>
-            <strong>Countries</strong>
-          </p>
+          <p class="font-bold">Countries</p>
           {Object.values(countries).length > 0
             ? (
               <Chart
                 type="pie"
-                width={290}
+                width={550}
                 height={290}
                 data={{
                   labels: Object.keys(countries),
