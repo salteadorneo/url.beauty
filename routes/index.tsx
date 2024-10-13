@@ -12,7 +12,7 @@ export const handler: Handlers = {
   async GET(_, ctx) {
     const links = [];
 
-    const entries = kv.list({ prefix: ["links"] }, { limit: 5 }, { reverse: true });
+    const entries = kv.list({ prefix: ["links"] });
     for await (const entry of entries) {
       links.push(entry);
     }
