@@ -45,7 +45,7 @@ export default function Page(props: PageProps) {
   return (
     <main class="relative max-w-screen-lg mx-auto px-4 text-zinc-800">
       <Header />
-      <section class="max-w-xl mx-auto">
+      <section class="hidden max-w-xl mx-auto">
         <p class="text-lg font-medium mb-4">
           Last 5 shortened links
         </p>
