@@ -1,14 +1,12 @@
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { qrcode } from "https://deno.land/x/qrcode@v2.0.0/mod.ts";
-import { Chart } from "$fresh_charts/mod.ts";
 import { getIPLocation } from "https://deno.land/x/ip_location@v1.0.0/mod.ts";
 
-import Header from "../components/Header.tsx";
 import Footer from "../components/Footer.tsx";
-import CopyToClipboard from "../islands/CopyToClipboard.tsx";
-import DownloadQr from "../components/DownloadQr.tsx";
 import { ValueProps } from "../types.ts";
-import { hashStr, idToShortURL, parseUrl } from "../utils.ts";
+import { hashStr, idToShortURL } from "../utils.ts";
+import Link from "../components/Link.tsx";
+import ChartClient from "../islands/ChartClient.tsx";
 
 const ORIGIN = Deno.env.get("ORIGIN") || "http://localhost:8000";
 
@@ -165,67 +163,18 @@ export default function Page(props: PageProps) {
         </h1>
       </section>
       <section class="max-w-xl mx-auto">
-        <section class="flex items-center justify-between py-3 px-4 border border-zinc-200 rounded bg-zinc-100">
-          <div class="flex flex-col max-sm:items-center">
-            <div class="flex items-center gap-1">
-              <a href={`${ORIGIN}/${hash}`} target="_blank" class="font-semibold">
-                {`url.beauty/${hash}`}
-              </a>
-              <CopyToClipboard value={`${ORIGIN}/${hash}`} />
-              <DownloadQr href={qr} />
-            </div>
-            <p class="flex items-center gap-1 text-sm font-medium text-zinc-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="lucide lucide-corner-down-right"
-              >
-                <polyline points="15 10 20 15 15 20" />
-                <path d="M4 4v7a4 4 0 0 0 4 4h12" />
-              </svg>
-              <a href={path} target="_blank">{parseUrl(path)}</a>
-            </p>
-          </div>
-          <a
-            href={`${ORIGIN}/${path}`}
-            class="flex items-center gap-1 bg-zinc-200 hover:bg-zinc-300 rounded-full py-0.5 px-2 text-sm"
-          >
-            {count} clicks
-          </a>
-          <img
-            src={qr}
-            alt="QR code"
-            class="hidden border-2 border-zinc-200 rounded"
-          />
-        </section>
+        <Link hash={hash} qr={qr} path={path} count={count} />
       </section>
       <section id="stats" class="flex flex-col gap-2 max-w-xl mx-auto mt-2">
         <div class="grid p-4 border rounded">
           <p class="font-bold">Last 7 days</p>
           {data.length > 0
             ? (
-                <Chart
-                  type="bar"
-                  width={550}
-                  height={300}
-                  data={{
-                    labels,
-                    datasets: [
-                      {
-                        label: "",
-                        data: data.map((d) => d.count),
-                        backgroundColor: "#EC4899",
-                      },
-                    ],
-                  }}
-                />
+              <ChartClient
+                type="bar"
+                labels={labels}
+                data={data}
+              />
             )
             : <p class="w-full text-center text-xs opacity-80">No data</p>}
         </div>
@@ -233,20 +182,10 @@ export default function Page(props: PageProps) {
           <p class="font-bold">Referrers</p>
           {Object.values(referrers).length > 0
             ? (
-              <Chart
+              <ChartClient
                 type="pie"
-                width={550}
-                height={290}
-                data={{
-                  labels: Object.keys(referrers),
-                  datasets: [
-                    {
-                      label: "",
-                      data: Object.values(referrers),
-                      backgroundColor: "#EC4899",
-                    },
-                  ],
-                }}
+                labels={Object.keys(referrers)}
+                data={Object.values(referrers).map((count) => ({ count }))}
               />
             )
             : <p class="w-full text-center text-xs opacity-80">No data</p>}
@@ -255,20 +194,10 @@ export default function Page(props: PageProps) {
           <p class="font-bold">Countries</p>
           {Object.values(countries).length > 0
             ? (
-              <Chart
+              <ChartClient
                 type="pie"
-                width={550}
-                height={290}
-                data={{
-                  labels: Object.keys(countries),
-                  datasets: [
-                    {
-                      label: "",
-                      data: Object.values(countries),
-                      backgroundColor: "#EC4899",
-                    },
-                  ],
-                }}
+                labels={Object.keys(countries)}
+                data={Object.values(countries).map((count) => ({ count }))}
               />
             )
             : <p class="w-full text-center text-xs opacity-80">No data</p>}
