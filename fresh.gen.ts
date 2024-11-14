@@ -6,8 +6,9 @@ import * as $_query_ from "./routes/[...query].tsx";
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $index from "./routes/index.tsx";
+import * as $ChartClient from "./islands/ChartClient.tsx";
 import * as $CopyToClipboard from "./islands/CopyToClipboard.tsx";
-import { type Manifest } from "$fresh/server.ts";
+import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
@@ -17,6 +18,7 @@ const manifest = {
     "./routes/index.tsx": $index,
   },
   islands: {
+    "./islands/ChartClient.tsx": $ChartClient,
     "./islands/CopyToClipboard.tsx": $CopyToClipboard,
   },
   baseUrl: import.meta.url,
