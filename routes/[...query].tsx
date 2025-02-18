@@ -73,7 +73,7 @@ export const handler: Handlers = {
       time: new Date(),
     });
 
-    kv.set(["links", parseQuery], { path, count: count + 1, requests });
+    // kv.set(["links", parseQuery], { path, count: count + 1, requests });
 
     if (!path.startsWith("http")) {
       return Response.redirect(`https://${path}`, 307);
